@@ -9,6 +9,10 @@ export const getUsersForSideBar = async (req, res) => {
         const loggedInUserId = req.user._id;
         var friends = await Friend.findOne({ userId: loggedInUserId });
 
+        if (!friends) {
+            return res.status(200).json([]);
+        }
+
         const messages = await Message.find({
             $or: [{ senderId: loggedInUserId }, { receiverId: loggedInUserId }],
         }).sort({ createdAt: -1 });
@@ -26,12 +30,12 @@ export const getUsersForSideBar = async (req, res) => {
 
         friendIds.map((id) => {
             if (friends.friendIds.includes(id)) {
-                const index = friends.friendIds.indexOf(id);
-                delete friends.friendIds[index];
+                const index = friends?.friendIds.indexOf(id);
+                delete friends?.friendIds[index];
             }
         });
 
-        const newIds = [...friendIds, ...friends.friendIds];
+        const newIds = [...friendIds, ...friends?.friendIds];
 
         const users = await getUsersByIds(newIds);
 
