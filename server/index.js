@@ -25,7 +25,16 @@ app.use("/api/auth", authRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/request", requestRouter);
 
-server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-    connectDB();
-});
+const startServer = async () => {
+    try {
+        await connectDB();
+        server.listen(port, () => {
+            console.log(`Server running on port ${port}`);
+        });
+    } catch (error) {
+        console.error("Error starting server:", error);
+        process.exit(1);
+    }
+};
+
+startServer();
