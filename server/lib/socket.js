@@ -3,18 +3,41 @@ import http from "http";
 import { Server } from "socket.io";
 import { getFriends } from "./util.js";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+app.use(
+    cors({
+        origin: [
+            process.env.FRONTEND_URL,
+            "http://localhost:3000", // For local development
+        ],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: true,
+    })
+);
+
+// 2. Explicit OPTIONS handler for preflight requests
+app.options("*", cors());
+
+// 3. Enhanced Socket.IO CORS configuration
 const io = new Server(server, {
     cors: {
-        origin: [process.env.FRONTEND_URL],
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        origin: [
+            process.env.FRONTEND_URL,
+            "https://chatty-rust-six.vercel.app",
+            "http://localhost:3000",
+        ],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: true,
     },
+    transports: ["websocket", "polling"], // Ensure both transports are enabled
 });
-
 const userSocketMap = {};
 
 export const getReceiverSocketId = (userId) => {
