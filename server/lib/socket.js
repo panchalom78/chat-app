@@ -8,7 +8,6 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
 app.use(
     cors({
         origin: [
@@ -23,6 +22,8 @@ app.use(
 
 // 2. Explicit OPTIONS handler for preflight requests
 app.options("*", cors());
+
+const server = http.createServer(app);
 
 // 3. Enhanced Socket.IO CORS configuration
 const io = new Server(server, {
