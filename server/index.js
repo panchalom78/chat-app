@@ -21,6 +21,8 @@ app.use(cookieParser());
 //     })
 // );
 
+console.log(process.env.FRONTEND_URL);
+
 const allowedOrigins = [
     process.env.FRONTEND_URL,
     // Add other environments if needed
