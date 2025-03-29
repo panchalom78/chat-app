@@ -10,9 +10,16 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: [process.env.FRONTEND_URL],
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        origin: [
+            process.env.FRONTEND_URL,
+            "https://chatty-rust-six.vercel.app", // Explicitly include your frontend URL
+            "http://localhost:5175", // For local development
+        ],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Include OPTIONS for preflight
+        allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
+        credentials: true, // Important for cookies/sessions
     },
+    allowEIO3: true, // For Socket.IO v2 client compatibility if needed
 });
 
 const userSocketMap = {};
