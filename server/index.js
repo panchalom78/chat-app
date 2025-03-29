@@ -6,6 +6,7 @@ import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
 import requestRouter from "./routes/friend.route.js";
 import { app, server } from "./lib/socket.js";
+import cors from "cors";
 
 dotenv.config();
 const port = process.env.PORT;
@@ -20,6 +21,20 @@ app.use(cookieParser());
 //     })
 // );
 
+app.use(
+    cors({
+        origin: [
+            process.env.FRONTEND_URL,
+            "http://localhost:3000", // For local development
+        ],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: true,
+    })
+);
+
+// 2. Explicit OPTIONS handler for preflight requests
+app.options("*", cors());
 console.log(process.env.FRONTEND_URL);
 
 const allowedOrigins = [

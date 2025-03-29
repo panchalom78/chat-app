@@ -3,25 +3,11 @@ import http from "http";
 import { Server } from "socket.io";
 import { getFriends } from "./util.js";
 import dotenv from "dotenv";
-import cors from "cors";
+// import cors from "cors";
 
 dotenv.config();
 
 const app = express();
-app.use(
-    cors({
-        origin: [
-            process.env.FRONTEND_URL,
-            "http://localhost:3000", // For local development
-        ],
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-        credentials: true,
-    })
-);
-
-// 2. Explicit OPTIONS handler for preflight requests
-app.options("*", cors());
 
 const server = http.createServer(app);
 
