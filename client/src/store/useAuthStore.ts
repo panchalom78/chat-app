@@ -96,11 +96,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         if (!authUser || get().socket?.connected) return;
 
         const socket = io(BASE_URL, {
-            path: "/socket.io/",
-            transports: ["websocket", "polling"],
-            autoConnect: true,
-            reconnection: true,
-            withCredentials: true,
             query: {
                 userId: authUser._id,
             },
