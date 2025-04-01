@@ -6,7 +6,7 @@ import { connectDB } from "../lib/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import requestRouter from "../routes/friend.route.js";
-import { app, server } from "../socket.js";
+import { app } from "../socket.js";
 
 dotenv.config();
 const port = process.env.PORT;
@@ -25,16 +25,6 @@ app.use("/api/auth", authRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/request", requestRouter);
 
-const startServer = async () => {
-    try {
-        await connectDB();
-        server.listen(port, () => {
-            console.log(`Server running on port ${port}`);
-        });
-    } catch (error) {
-        console.error("Error starting server:", error);
-        process.exit(1);
-    }
-};
+connectDB();
 
-await startServer();
+export default app;
