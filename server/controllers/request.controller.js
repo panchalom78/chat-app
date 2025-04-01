@@ -1,7 +1,7 @@
 import Friend from "../models/friend.model.js";
 import User from "../models/user.model.js";
 import { getUsersByIds } from "../lib/util.js";
-import { getReceiverSocketId, io } from "../lib/socket.js";
+import { getReceiverSocketId, io } from "../socket.js";
 
 export const sendRequest = async (req, res) => {
     try {

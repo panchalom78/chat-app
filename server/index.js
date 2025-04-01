@@ -6,7 +6,7 @@ import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import requestRouter from "./routes/friend.route.js";
-import { app, server } from "./lib/socket.js";
+import { app, server } from "./socket.js";
 
 dotenv.config();
 const port = process.env.PORT;

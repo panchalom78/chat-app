@@ -1,7 +1,7 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
-import { getFriends } from "./util.js";
+import { getFriends } from "./lib/util.js";
 import dotenv from "dotenv";
 
 dotenv.config();
