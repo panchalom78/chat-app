@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import { Server } from "socket.io";
 import { getFriends } from "./lib/util.js";
 import dotenv from "dotenv";
@@ -6,7 +7,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const io = new Server({
+const server = http.createServer(app);
+const io = new Server(server, {
     cors: {
         origin: [process.env.FRONTEND_URL],
         methods: ["GET", "POST", "PUT", "DELETE"],
@@ -47,4 +49,4 @@ io.on("connection", async (socket) => {
     });
 });
 
-export { io, app };
+export { io, server, app };
