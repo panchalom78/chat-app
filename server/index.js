@@ -29,6 +29,7 @@ const startServer = async () => {
     try {
         await connectDB();
         server.listen(port, () => {
+            console.log(process.env.FRONTEND_URL);
             console.log(`Server running on port ${port}`);
         });
     } catch (error) {
