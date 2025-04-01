@@ -12,6 +12,9 @@ const io = new Server({
         methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true,
     },
+    path: "/socket.io/",
+    addTrailingSlash: false,
+    transports: ["websocket", "polling"],
 });
 
 const userSocketMap = {};
@@ -47,4 +50,5 @@ io.on("connection", async (socket) => {
     });
 });
 
+app.io = io;
 export { io, app };
