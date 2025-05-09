@@ -23,6 +23,15 @@ export const signup = async (req, res) => {
                 .status(400)
                 .json({ message: "User already registered. Please login" });
         }
+        const userbyName = await User.findOne({ fullName });
+        if (userbyName) {
+            return res
+                .status(400)
+                .json({
+                    message:
+                        "Username already taken. Please try different name",
+                });
+        }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);

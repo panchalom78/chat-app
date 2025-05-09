@@ -11,13 +11,16 @@ const HomePage = () => {
         acceptRequestChecker,
         removeAcceptRequestChecker,
     } = useChatStore();
-    const { selectedUser } = useChatStore();
+    const { selectedUser, subscribeToMessage, unsubscribeToMessage } =
+        useChatStore();
     useEffect(() => {
         addRequestChecker();
         acceptRequestChecker();
+        subscribeToMessage();
         return () => {
             removeRequestChecker();
             removeAcceptRequestChecker();
+            unsubscribeToMessage();
         };
     }, []);
     return (

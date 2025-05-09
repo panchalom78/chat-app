@@ -43,7 +43,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         set({ isUsersLoading: true });
         try {
             const res = await axiosInstance.get("/message/users");
-            set({ users: res.data });
+            const modifiedUsers = res.data.map((userData: any) => ({
+                ...userData,
+                isNewNotificationReceived: false,
+            }));
+            set({ users: modifiedUsers });
         } catch (error: any) {
             toast.error(error.response.data.message);
         } finally {
@@ -62,7 +66,19 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ isMessagesLoading: false });
         }
     },
-    setSelectedUser: (user: any) => set({ selectedUser: user }),
+    setSelectedUser: (user: any) => {
+        if (user !== null && user.isNewNotificationReceived === true) {
+            const modifiedUsers = get().users;
+            modifiedUsers.forEach((userData) => {
+                if (userData._id === user._id) {
+                    userData.isNewNotificationReceived = false;
+                    return;
+                }
+            });
+            set({ users: modifiedUsers });
+        }
+        set({ selectedUser: user });
+    },
 
     sendMessage: async (message) => {
         const { selectedUser, messages } = get();
@@ -147,17 +163,39 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         }
     },
     subscribeToMessage: () => {
-        const { selectedUser } = get();
-        if (!selectedUser) return;
         const socket = useAuthStore.getState().socket;
         socket.on("newMessage", (message: any) => {
             console.log("socket message", message);
 
             if (
+                get().selectedUser === null ||
                 get().selectedUser._id.toString() !==
-                message.senderId.toString()
-            )
+                    message.senderId.toString()
+            ) {
+                const index = get().users.findIndex(
+                    (user: any) =>
+                        user._id.toString() === message.senderId.toString()
+                );
+                console.log("index", index);
+
+                if (index !== -1) {
+                    const modifiedUsers = get().users;
+                    const [user] = modifiedUsers.splice(index, 1);
+                    user.isNewNotificationReceived = true;
+                    toast(`New message received from - ${user.fullName}`, {
+                        icon: "💬",
+                        style: {
+                            borderRadius: "10px",
+                            background: "#333",
+                            color: "#fff",
+                        },
+                    });
+                    modifiedUsers.unshift(user);
+                    set({ users: modifiedUsers });
+                }
                 return;
+            }
+
             set({ messages: [...get().messages, message] });
         });
     },

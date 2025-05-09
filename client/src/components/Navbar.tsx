@@ -15,12 +15,9 @@ const Navbar = () => {
                         <h1 className="text-lg font-bold">Chatty</h1>
                     </Link>
                     <div className="flex items-center gap-4">
-                        <Link
-                            to="/settings"
-                            className="btn btn-sm gap-2 text-base-300"
-                        >
+                        <Link to="/settings" className="btn btn-sm gap-2">
                             <Settings className="w-4 h-4" />
-                            <span>Settings</span>
+                            <span className="hidden sm:block">Settings</span>
                         </Link>
                         {authUser && (
                             <>
@@ -29,14 +26,18 @@ const Navbar = () => {
                                     className="btn btn-sm gap-2"
                                 >
                                     <User className="w-4 h-4" />
-                                    <span>Profile</span>
+                                    <span className="hidden sm:block">
+                                        Profile
+                                    </span>
                                 </Link>
                                 <button
-                                    className="flex items-center gap-1.5"
+                                    className="flex items-center gap-1.5 btn btn-sm"
                                     onClick={logout}
                                 >
                                     <LogOut className="size-4" />
-                                    <span>Logout</span>
+                                    <span className="hidden sm:block">
+                                        Logout
+                                    </span>
                                 </button>
                             </>
                         )}

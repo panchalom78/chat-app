@@ -13,15 +13,17 @@ export const generateToken = (userId, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: "lax",
     });
     return token;
 };
 
 export const getUsersByIds = async (ids) => {
-    const users = await User.find({
-        _id: { $in: ids },
-    }).select("-password -email");
+    const users = await Promise.all(
+        ids.map(async (id) => {
+            return await User.findOne({ _id: id }).select("-email -password");
+        })
+    );
     return users;
 };
 

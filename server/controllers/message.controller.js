@@ -3,41 +3,54 @@ import Friend from "../models/friend.model.js";
 import Message from "../models/message.model.js";
 import { getUsersByIds } from "../lib/util.js";
 import { getReceiverSocketId, io } from "../socket.js";
+import mongoose from "mongoose";
+
+async function getLatestMessageTimes(userId, otherUserIds) {
+    try {
+        const latestMessages = await Promise.all(
+            otherUserIds.map(async (otherId) => {
+                const message = await Message.findOne({
+                    $or: [
+                        { senderId: userId, receiverId: otherId },
+                        { senderId: otherId, receiverId: userId },
+                    ],
+                })
+                    .sort({ createdAt: -1 })
+                    .limit(1);
+
+                return {
+                    user: otherId,
+                    latestMessageTime: message ? message.createdAt : null,
+                };
+            })
+        );
+
+        return latestMessages
+            .sort((a, b) => {
+                if (!a.latestMessageTime) return 1;
+                if (!b.latestMessageTime) return -1;
+                return b.latestMessageTime - a.latestMessageTime;
+            })
+            .map((item) => item.user);
+    } catch (err) {
+        console.error("Error fetching latest message times:", err);
+        throw err;
+    }
+}
 
 export const getUsersForSideBar = async (req, res) => {
     try {
         const loggedInUserId = req.user._id;
-        var friends = await Friend.findOne({ userId: loggedInUserId });
-
-        if (!friends) {
+        const friends = await Friend.findOne({ userId: loggedInUserId });
+        if (!friends || friends.friendIds.length == 0) {
             return res.status(200).json([]);
         }
+        const friendsIds = await getLatestMessageTimes(
+            loggedInUserId,
+            friends.friendIds
+        );
 
-        const messages = await Message.find({
-            $or: [{ senderId: loggedInUserId }, { receiverId: loggedInUserId }],
-        }).sort({ createdAt: -1 });
-
-        const friendIds = [
-            ...new Set(
-                messages.map((msg) => {
-                    // If senderId is the logged in user, return receiverId, else return senderId
-                    return msg.senderId.toString() === loggedInUserId.toString()
-                        ? msg.receiverId.toString()
-                        : msg.senderId.toString();
-                })
-            ),
-        ];
-
-        friendIds.map((id) => {
-            if (friends.friendIds.includes(id)) {
-                const index = friends?.friendIds.indexOf(id);
-                delete friends?.friendIds[index];
-            }
-        });
-
-        const newIds = [...friendIds, ...friends?.friendIds];
-
-        const users = await getUsersByIds(newIds);
+        const users = await getUsersByIds(friendsIds);
 
         res.status(200).json(users);
     } catch (error) {
@@ -46,70 +59,6 @@ export const getUsersForSideBar = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
-
-// export const getUsersForSideBar = async (req, res) => {
-//     try {
-//         const loggedInUserId = req.user._id;
-//         const friends = await Friend.findOne({ userId: loggedInUserId });
-
-//         if (!friends || !friends.friendIds.length) {
-//             return res.status(200).json([]);
-//         }
-
-//         // Aggregate to find the latest message for each friend
-//         const latestMessages = await Message.aggregate([
-//             {
-//                 $match: {
-//                     $or: [
-//                         { senderId: loggedInUserId },
-//                         { receiverId: loggedInUserId },
-//                     ],
-//                 },
-//             },
-//             {
-//                 $sort: { createdAt: -1 },
-//             },
-//             {
-//                 $group: {
-//                     _id: {
-//                         $cond: [
-//                             { $eq: ["$senderId", loggedInUserId] },
-//                             "$receiverId",
-//                             "$senderId",
-//                         ],
-//                     },
-//                     latestMessage: { $first: "$$ROOT" },
-//                 },
-//             },
-//             {
-//                 $match: {
-//                     _id: { $in: friends.friendIds },
-//                 },
-//             },
-//             {
-//                 $sort: { "latestMessage.createdAt": -1 },
-//             },
-//         ]);
-
-//         // Extract user IDs from the aggregation result
-//         const sortedUserIds = latestMessages.map((msg) => msg._id);
-
-//         // Fetch user details
-//         const users = await User.find({ _id: { $in: sortedUserIds } })
-//             .select("-password -email")
-//             .lean();
-
-//         // Sort users based on the order of sortedUserIds
-//         const sortedUsers = sortedUserIds.map((id) =>
-//             users.find((user) => user._id.toString() === id.toString())
-//         );
-
-//         res.status(200).json(sortedUsers);
-//     } catch (error) {
-//         console.error("Error in getUsersForSideBar:", error);
-//         return res.status(500).json({ message: "Internal server error" });
-//     }
-// };
 
 export const getMessages = async (req, res) => {
     try {
