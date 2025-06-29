@@ -30,7 +30,7 @@ function App() {
         );
     }
     return (
-        <div data-theme={theme}>
+        <div data-theme={theme} className="flex flex-col h-screen">
             <Navbar />
             <Toaster />
             <Routes>
