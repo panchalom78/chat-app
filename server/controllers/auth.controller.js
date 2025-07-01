@@ -1,7 +1,10 @@
 import cloudinary from "../lib/cloudinary.js";
 import { generateToken } from "../lib/util.js";
+import Friend from "../models/friend.model.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import { config } from "dotenv";
+config();
 
 export const signup = async (req, res) => {
     try {
@@ -14,7 +17,7 @@ export const signup = async (req, res) => {
         if (password.length < 8) {
             return res
                 .status(400)
-                .json({ message: "Password must be atleast 6 characters" });
+                .json({ message: "Password must be at least 6 characters" });
         }
 
         const user = await User.findOne({ email });
@@ -25,12 +28,9 @@ export const signup = async (req, res) => {
         }
         const userbyName = await User.findOne({ fullName });
         if (userbyName) {
-            return res
-                .status(400)
-                .json({
-                    message:
-                        "Username already taken. Please try different name",
-                });
+            return res.status(400).json({
+                message: "Username already taken. Please try different name",
+            });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -43,6 +43,13 @@ export const signup = async (req, res) => {
         });
 
         await newUser.save();
+
+        await Friend.create({
+            userId: newUser._id,
+            requestIds: [],
+            friendIds: [process.env.CHATBOT_ID],
+            requestedIds: [],
+        });
         generateToken(newUser._id, res);
         return res.status(201).json({
             _id: newUser._id,

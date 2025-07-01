@@ -36,7 +36,11 @@ const UserCard = ({ user }: any) => {
             <div className="block text-left min-w-0">
                 <div className="font-medium truncate">{user.fullName}</div>
                 <div className="text-sm text-zinc-400 truncate">
-                    {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+                    {import.meta.env.VITE_REACT_APP_CHATBOT_ID == user?._id
+                        ? "Your AI-Powered Assistant"
+                        : onlineUsers.includes(user._id)
+                        ? "Online"
+                        : "Offline"}
                 </div>
             </div>
 

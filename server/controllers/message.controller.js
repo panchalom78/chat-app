@@ -3,7 +3,9 @@ import Friend from "../models/friend.model.js";
 import Message from "../models/message.model.js";
 import { getUsersByIds } from "../lib/util.js";
 import { getReceiverSocketId, io } from "../socket.js";
-import mongoose from "mongoose";
+import { config } from "dotenv";
+import { generateImage, generateText } from "../lib/ai.js";
+config();
 
 async function getLatestMessageTimes(userId, otherUserIds) {
     try {
@@ -99,11 +101,23 @@ export const sendMessage = async (req, res) => {
         });
         await newMessage.save();
 
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if (receiverSocketId) {
-            io.to(receiverSocketId).emit("newMessage", newMessage);
+        if (receiverId == process.env.CHATBOT_ID) {
+            if (
+                text.toLowerCase().startsWith("generate image") ||
+                text.toLowerCase().startsWith("create image")
+            ) {
+                generateImage(text, senderId);
+            } else {
+                generateText(text, senderId);
+            }
         }
 
+        if (receiverId != process.env.CHATBOT_ID) {
+            const receiverSocketId = getReceiverSocketId(receiverId);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit("newMessage", newMessage);
+            }
+        }
         return res.status(201).json(newMessage);
     } catch (error) {
         console.log(error);

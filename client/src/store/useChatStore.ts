@@ -88,6 +88,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
                 message
             );
             set({ messages: [...messages, res.data] });
+            // if(selectedUser._id == import.meta.env.VITE_REACT_APP_CHATBOT_ID){
+            //     set({messages:[...messages,{senderId:selectedUser._id,receiverId:useAuthStore.getState().authUser?._id,text:"<span></span>"}]})
+            // }
         } catch (error: any) {
             toast.error(error.response.data.message);
         }

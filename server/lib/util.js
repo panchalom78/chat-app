@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "../models/user.model.js";
 import Friend from "../models/friend.model.js";
+import Message from "../models/message.model.js";
+import { getReceiverSocketId, io } from "../socket.js";
 
 dotenv.config();
 
@@ -30,4 +32,42 @@ export const getUsersByIds = async (ids) => {
 export const getFriends = async (userId) => {
     const user = await Friend.findOne({ userId });
     return user?.friendIds || [];
+};
+
+export const getMessages = async (req, res) => {
+    try {
+        const { id: userToChatId } = req.params;
+        const myId = req.user._id;
+
+        const messages = await Message.find({
+            $or: [
+                { senderId: myId, receiverId: userToChatId },
+                { senderId: userToChatId, receiverId: myId },
+            ],
+        });
+
+        return res.status(200).json(messages);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const sendMessage = async (text, imageUrl = "", receiverId) => {
+    try {
+        const newMessage = new Message({
+            senderId: process.env.CHATBOT_ID,
+            receiverId,
+            text,
+            image: imageUrl,
+        });
+        await newMessage.save();
+
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
+    } catch (error) {
+        console.log(error);
+    }
 };
