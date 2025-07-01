@@ -46,7 +46,7 @@ function SideBar() {
                 }}
             >
                 <UserPlus className="size-6" />
-                <span className="font-medium hidden lg:block">Add Friends</span>
+                <span className="font-medium">Add Friends</span>
             </button>
 
             <button

@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 
 const SidebarSkeleton = () => {
     // Create 8 skeleton items
@@ -6,21 +6,16 @@ const SidebarSkeleton = () => {
 
     return (
         <aside
-            className="h-full w-20 lg:w-72 border-r border-base-300 
-    flex flex-col transition-all duration-200"
+            className={`h-full sm:w-50 md:w-60 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-300 overflow-hidden w-full`}
         >
             {/* Header */}
-            <div className="border-b border-base-300 w-full p-5">
-                <div className="flex items-center gap-2">
-                    <Users className="w-6 h-6" />
-                    <span className="font-medium hidden lg:block">
-                        Contacts
-                    </span>
-                </div>
+            <div className="border-b border-base-300 w-full gap-2 flex items-center p-5 justify-normal">
+                <Users className="size-6" />
+                <span className="ml-3 font-medium">Friends</span>
             </div>
 
             {/* Skeleton Contacts */}
-            <div className="overflow-y-auto w-full py-3">
+            <div className="overflow-y-auto w-full py-3 flex-1">
                 {skeletonContacts.map((_, idx) => (
                     <div
                         key={idx}
@@ -32,13 +27,26 @@ const SidebarSkeleton = () => {
                         </div>
 
                         {/* User info skeleton - only visible on larger screens */}
-                        <div className="hidden lg:block text-left min-w-0 flex-1">
-                            <div className="skeleton h-4 w-32 mb-2" />
-                            <div className="skeleton h-3 w-16" />
+                        <div className="text-left min-w-0 flex-1">
+                            <div className="skeleton h-4 w-3/4 sm:w-4/5 mb-2" />
+                            <div className="skeleton h-3 w-2/4 sm:w-3/5" />
                         </div>
                     </div>
                 ))}
             </div>
+            <button
+                className="border-b border-base-300 w-full gap-2 hidden sm:flex items-center p-4 border-t cursor-pointer justify-center lg:justify-normal"
+                onClick={() => {
+                    (
+                        document.getElementById(
+                            "my_modal_1"
+                        ) as HTMLDialogElement
+                    )?.showModal();
+                }}
+            >
+                <UserPlus className="size-6" />
+                <span className="font-medium">Add Friends</span>
+            </button>
         </aside>
     );
 };
